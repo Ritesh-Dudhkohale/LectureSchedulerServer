@@ -98,6 +98,7 @@ const getAllCourses = async (req, res) => {
       );
   }
 };
+
 const getCourse = async (req, res) => {
   try {
     const role = req.user.role;
@@ -105,7 +106,7 @@ const getCourse = async (req, res) => {
     if (!role || role !== "admin") {
       throw new CustomError(400, "Only admin can see all courses");
     }
-    const id = req.param.courseID;
+    const id = req.params.courseID;
     if (!id) {
       throw new CustomError(400, "Course Id is required");
     }
