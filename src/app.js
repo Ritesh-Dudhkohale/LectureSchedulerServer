@@ -9,12 +9,12 @@ import instructorRouter from "./routes/instructor.routes.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/users", userRouter);
-app.use("/api/admin", adminRouter);
-app.use("/api/instructor", instructorRouter);
+app.use("/api/admins", adminRouter);
+app.use("/api/instructors", instructorRouter);
 
 export default app;

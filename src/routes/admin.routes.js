@@ -4,6 +4,7 @@ import {
   createCourse,
   getAllCourses,
   getAllInstructor,
+  getAllSchedule,
 } from "../controller/admin.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 import authenticate from "../middlewares/auth.middleware.js";
@@ -16,7 +17,7 @@ router
   .get(getAllCourses)
   .post(upload.single("image"), createCourse);
 
-router.route("/lectures").post(assignLecture);
+router.route("/lectures").get(getAllSchedule).post(assignLecture);
 
 router.route("/instructors").get(getAllInstructor);
 

@@ -29,13 +29,13 @@ const createCourse = async (req, res) => {
     }
 
     const imagePath = req.file?.path;
-
     if (!imagePath) {
       throw new CustomError(400, "Course image is required");
     }
-
+    console.log(3);
     const image = await uploadOnCloudinary(imagePath);
 
+    console.log(4);
     if (!image) {
       throw CustomError(400, "Images file is not uploaded");
     }
@@ -173,6 +173,42 @@ const assignLecture = async (req, res) => {
   }
 };
 
+const getAllSchedule = async (req, res) => {
+  try {
+    const role = req.user.role;
+
+    if (!role || role !== "admin") {
+      throw new CustomError(400, "Only admin can see all schedule");
+    }
+    const lectures = await Lecture.find()
+      .populate({
+        path: "course",
+        select: "name level",
+      })
+      .populate({ path: "instructor", select: "fullname" })
+      .sort({ date: -1 });
+
+    if (lectures.length === 0) {
+      throw new CustomError(200, "No Lectures assigned to the instructor");
+    }
+
+    return res
+      .status(200)
+      .json(new APIResponse(200, "Following lectures are sheduled", lectures));
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json(
+        new APIResponse(
+          error.statusCode || 500,
+          error.message || "Internal server error",
+          null,
+          false
+        )
+      );
+  }
+};
+
 const getAllInstructor = async (req, res) => {
   try {
     const role = req.user.role;
@@ -208,4 +244,10 @@ const getAllInstructor = async (req, res) => {
   }
 };
 
-export { createCourse, getAllCourses, getAllInstructor, assignLecture };
+export {
+  createCourse,
+  getAllCourses,
+  getAllInstructor,
+  assignLecture,
+  getAllSchedule,
+};
