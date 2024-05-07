@@ -98,6 +98,40 @@ const getAllCourses = async (req, res) => {
       );
   }
 };
+const getCourse = async (req, res) => {
+  try {
+    const role = req.user.role;
+
+    if (!role || role !== "admin") {
+      throw new CustomError(400, "Only admin can see all courses");
+    }
+    const id = req.param.courseID;
+    if (!id) {
+      throw new CustomError(400, "Course Id is required");
+    }
+
+    const courses = await Course.findById(id);
+
+    if (courses.length === 0) {
+      throw new CustomError(200, "courses is not available/registered");
+    }
+
+    return res
+      .status(200)
+      .json(new APIResponse(200, "Courses are available", courses));
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json(
+        new APIResponse(
+          error.statusCode || 500,
+          error.message || "Internal server error",
+          null,
+          false
+        )
+      );
+  }
+};
 
 const assignLecture = async (req, res) => {
   try {
@@ -250,4 +284,5 @@ export {
   getAllInstructor,
   assignLecture,
   getAllSchedule,
+  getCourse,
 };
