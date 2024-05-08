@@ -188,7 +188,7 @@ const assignLecture = async (req, res) => {
       })
       .populate({
         path: "instructor",
-        select: "-password -createdAt -updatedAt",
+        select: "-password",
       });
 
     if (!assignedLecture) {
