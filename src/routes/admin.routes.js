@@ -5,6 +5,7 @@ import {
   getAllCourses,
   getAllInstructor,
   getAllSchedule,
+  getAvailableInstructor,
   getCourse,
 } from "../controller/admin.controller.js";
 import upload from "../middlewares/multer.middleware.js";
@@ -23,5 +24,6 @@ router.route("/courses/:courseID").get(getCourse);
 router.route("/lectures").get(getAllSchedule).post(assignLecture);
 
 router.route("/instructors").get(getAllInstructor);
+router.route("/instructors/:date").get(getAvailableInstructor);
 
 export default router;

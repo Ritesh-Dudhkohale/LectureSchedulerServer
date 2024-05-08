@@ -49,7 +49,7 @@ const createCourse = async (req, res) => {
 
     const savedCourse = await Course.findById(course._id).orFail(() => {
       throw new CustomError(500, "Course is not saved");
-    });
+    }).select;
 
     return res
       .status(201)
@@ -182,8 +182,14 @@ const assignLecture = async (req, res) => {
     });
 
     const assignedLecture = await Lecture.findById(lecture._id)
-      .populate({ path: "course", select: "name level description image" })
-      .populate({ path: "instructor", select: "password createdAt updatedAt" });
+      .populate({
+        path: "course",
+        select: "name level description image -createdAt -updatedAt",
+      })
+      .populate({
+        path: "instructor",
+        select: "-password -createdAt -updatedAt",
+      });
 
     if (!assignedLecture) {
       throw new CustomError(500, "Lecture is assigned");
@@ -279,6 +285,56 @@ const getAllInstructor = async (req, res) => {
   }
 };
 
+const getAvailableInstructor = async (req, res) => {
+  try {
+    const role = req.user.role;
+
+    if (!role || role !== "admin") {
+      throw new CustomError(400, "Only admin can see all instructors");
+    }
+
+    const paramdate = req.params.date;
+
+    const lecturesDate = await Lecture.find({
+      date: paramdate,
+    }).populate("instructor");
+
+    const assignedInstructors = lecturesDate.map(
+      (lecture) => lecture.instructor._id
+    );
+
+    const unassignedInstructors = await User.find({
+      _id: { $nin: assignedInstructors },
+      role: "instructor",
+    }).select("-password -createdAt -updatedAt");
+
+    if (unassignedInstructors.length === 0) {
+      throw new CustomError(200, "Instructors are not available/registered");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new APIResponse(
+          200,
+          "Following instructors are available",
+          unassignedInstructors
+        )
+      );
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json(
+        new APIResponse(
+          error.statusCode || 500,
+          error.message || "Internal server error",
+          null,
+          false
+        )
+      );
+  }
+};
+
 export {
   createCourse,
   getAllCourses,
@@ -286,4 +342,5 @@ export {
   assignLecture,
   getAllSchedule,
   getCourse,
+  getAvailableInstructor,
 };
