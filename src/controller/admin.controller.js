@@ -184,7 +184,7 @@ const assignLecture = async (req, res) => {
     const assignedLecture = await Lecture.findById(lecture._id)
       .populate({
         path: "course",
-        select: "name level description image -createdAt -updatedAt",
+        select: "name level description image ",
       })
       .populate({
         path: "instructor",
